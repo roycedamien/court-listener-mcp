@@ -2,7 +2,6 @@
 .devcontainer/
 .vscode/
 scripts/
-docs/
 
 # VS Code user settings (keep workspace settings but ignore user-specific ones)
 *.code-workspace
