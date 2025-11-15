@@ -21,6 +21,7 @@ class Config(BaseSettings):
     # CourtListener API
     courtlistener_base_url: str = "https://www.courtlistener.com/api/rest/v4/"
     courtlistener_api_key: str | None = None
+    court_listener_api_key: str | None = None  # Alternative env var name
     courtlistener_timeout: int = 30
 
     model_config = {

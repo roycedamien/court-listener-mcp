@@ -116,16 +116,16 @@ async def setup() -> None:
     """Set up the server by importing subservers."""
     logger.info("Setting up CourtListener MCP server")
 
-    # Import search tools with prefix
-    await mcp.import_server("search", search_server)
+    # Import search tools with prefix (new API: server first, then prefix)
+    await mcp.import_server(search_server, prefix="search")
     logger.info("Imported search server tools")
 
     # Import get tools with prefix
-    await mcp.import_server("get", get_server)
+    await mcp.import_server(get_server, prefix="get")
     logger.info("Imported get server tools")
 
     # Import citation tools with prefix
-    await mcp.import_server("citation", citation_server)
+    await mcp.import_server(citation_server, prefix="citation")
     logger.info("Imported citation server tools")
 
     logger.info("Server setup complete")

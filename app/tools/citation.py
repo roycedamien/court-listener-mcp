@@ -204,7 +204,7 @@ async def verify_citation_format(
         Field(description="The citation to verify"),
     ],
     ctx: Context | None = None,
-) -> dict[str, str | bool | list[str] | None]:
+) -> dict[str, Any]:
     """Verify if a citation string is in a valid format using citeurl's advanced parsing.
 
     This tool performs validation using citeurl's comprehensive citation templates
@@ -374,7 +374,7 @@ async def parse_citation_with_citeurl(
         Field(description="Use broad matching for more flexible parsing", default=True),
     ] = True,
     ctx: Context | None = None,
-) -> dict[str, str | dict | None]:
+) -> dict[str, Any]:
     """Parse a legal citation using citeurl's advanced citation recognition.
 
     This tool uses the citeurl library to parse legal citations and extract

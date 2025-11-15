@@ -29,8 +29,8 @@ async def test_parse_citation(client: Client[Any]) -> None:
             "citation_parse_citation_with_citeurl", {"citation": "410 U.S. 113"}
         )
 
-        assert len(result) == 1
-        response = json.loads(result[0].text)
+        assert result.content is not None
+        response = json.loads(result.content[0].text)  # type: ignore[attr-defined]
         assert response["success"] is True
         assert "parsed" in response
 
@@ -49,7 +49,7 @@ async def test_extract_citations(client: Client[Any]) -> None:
             "citation_extract_citations_from_text", {"text": text}
         )
 
-        assert len(result) == 1
-        response = json.loads(result[0].text)
+        assert result.content is not None
+        response = json.loads(result.content[0].text)  # type: ignore[attr-defined]
         assert response["total_citations"] > 0
         assert len(response["citations"]) > 0
