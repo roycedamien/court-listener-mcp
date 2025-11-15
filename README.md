@@ -156,6 +156,7 @@ See [app/README.md](app/README.md) and [tests/README.md](tests/README.md) for tr
 
 - [Source Code Documentation](app/README.md)
 - [Test Documentation](tests/README.md)
+- [Pro Se Medical Malpractice Research Guide](docs/PRO_SE_GUIDE.md) ⚖️ **NEW**
 - [Project Context](context.json)
 - [CourtListener API Documentation](https://www.courtlistener.com/api/rest/v4/)
 - [eCFR API Documentation](https://www.ecfr.gov/developers/documentation/api/v1)
