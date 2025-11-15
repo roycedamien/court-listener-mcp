@@ -671,3 +671,95 @@ async def people(
         else:
             logger.error(error_msg)
         raise e
+
+
+@search_server.tool()
+async def financial_disclosures(
+    q: Annotated[
+        str, Field(description="Search query for judge financial disclosures")
+    ],
+    person_name: Annotated[str, Field(description="Filter by judge/person name")] = "",
+    year: Annotated[
+        int, Field(description="Filter by disclosure year", ge=1900, le=2100)
+    ] = 0,
+    order_by: Annotated[
+        str, Field(description="Sort by 'score desc' or 'year desc'")
+    ] = "score desc",
+    limit: Annotated[
+        int, Field(description="Maximum results to return", ge=1, le=100)
+    ] = 20,
+    ctx: Context | None = None,
+) -> dict[str, Any]:
+    """Search judge financial disclosure reports in the CourtListener database.
+
+    This is particularly useful for researching judges who may be presiding over cases,
+    including medical malpractice cases, to understand potential conflicts of interest.
+
+    Returns:
+        A dictionary containing search results with financial disclosure information.
+
+    Raises:
+        ValueError: If COURT_LISTENER_API_KEY is not found in environment variables.
+
+    """
+    if ctx:
+        await ctx.info(f"Searching financial disclosures with query: {q}")
+    else:
+        logger.info(f"Searching financial disclosures with query: {q}")
+
+    if not API_KEY:
+        error_msg = "COURT_LISTENER_API_KEY not found in environment variables"
+        if ctx:
+            await ctx.error(error_msg)
+        else:
+            logger.error(error_msg)
+        raise ValueError(error_msg)
+
+    params = {
+        "q": q,
+        "order_by": order_by,
+        "type": "fd",  # Financial disclosure type for V4 API
+    }
+
+    # Add optional filters
+    if person_name:
+        params["person_name"] = person_name
+    if year:
+        params["year"] = year
+    if limit:
+        params["hit"] = limit  # V4 uses 'hit' instead of 'limit'
+
+    headers = {"Authorization": f"Token {API_KEY}"}
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(
+                "https://www.courtlistener.com/api/rest/v4/search/",
+                params=params,
+                headers=headers,
+                timeout=30.0,
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            if ctx:
+                await ctx.info(f"Found {data.get('count', 0)} financial disclosures")
+            else:
+                logger.info(f"Found {data.get('count', 0)} financial disclosures")
+
+            return data
+
+    except httpx.HTTPStatusError as e:
+        error_msg = f"HTTP error: {e}"
+        if ctx:
+            await ctx.error(error_msg)
+        else:
+            logger.error(error_msg)
+        raise e
+    except Exception as e:
+        error_msg = f"Search error: {e}"
+        if ctx:
+            await ctx.error(error_msg)
+        else:
+            logger.error(error_msg)
+        raise e
