@@ -1,0 +1,95 @@
+{
+  "manifest_version": "0.2",
+  "name": "courtlistener-mcp",
+  "version": "1.0.0",
+  "display_name": "CourtListener MCP Server",
+  "description": "Access millions of legal opinions, court cases, judges, and federal regulations through CourtListener API v4 and eCFR",
+  "long_description": "The CourtListener MCP Server provides comprehensive access to legal case data, court opinions, and federal regulations through the extensive CourtListener and eCFR databases. Features include searching opinions/dockets/audio, retrieving specific cases, judge information, financial disclosures, citation parsing, and federal regulation lookup.",
+  "author": {
+    "name": "Royce Cano"
+  },
+  "homepage": "https://github.com/roycedamien/court-listener-mcp",
+  "server": {
+    "type": "python",
+    "entry_point": "app/__main__.py",
+    "mcp_config": {
+      "command": "uv",
+      "args": [
+        "run",
+        "python",
+        "-m",
+        "app"
+      ],
+      "env": {
+        "COURT_LISTENER_API_KEY": "${COURT_LISTENER_API_KEY}"
+      }
+    }
+  },
+  "tools": [
+    {
+      "name": "search__opinions",
+      "description": "Search legal opinions and court decisions"
+    },
+    {
+      "name": "search__dockets",
+      "description": "Search court cases and dockets"
+    },
+    {
+      "name": "search__audio",
+      "description": "Search oral argument audio recordings"
+    },
+    {
+      "name": "search__people",
+      "description": "Search judges and legal professionals"
+    },
+    {
+      "name": "search__financial_disclosures",
+      "description": "Search judge financial disclosure reports"
+    },
+    {
+      "name": "get__opinion",
+      "description": "Get a specific legal opinion by ID"
+    },
+    {
+      "name": "get__docket",
+      "description": "Get a specific court docket by ID"
+    },
+    {
+      "name": "get__court",
+      "description": "Get court information by ID"
+    },
+    {
+      "name": "get__person",
+      "description": "Get judge/person information by ID"
+    },
+    {
+      "name": "get__financial_disclosure",
+      "description": "Get judge financial disclosure details"
+    },
+    {
+      "name": "citation__lookup_citation",
+      "description": "Look up legal citations"
+    },
+    {
+      "name": "citation__parse_citation_with_citeurl",
+      "description": "Parse citation text with citeurl library"
+    },
+    {
+      "name": "citation__extract_citations_from_text",
+      "description": "Extract all citations from text"
+    }
+  ],
+  "keywords": [
+    "legal",
+    "court",
+    "opinions",
+    "cases",
+    "judges",
+    "citations",
+    "regulations",
+    "courtlistener",
+    "pacer",
+    "ecfr"
+  ],
+  "license": "MIT"
+}

@@ -163,6 +163,9 @@ backups/
 archive/
 archives/
 
+# MCPB bundles (tracked for releases)
+!*.mcpb
+
 # uv
 uv.lock.temp
 dist/

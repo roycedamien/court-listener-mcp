@@ -105,7 +105,116 @@ This will start the server at:
 
 Or use the VS Code task: **Run MCP Server**
 
-#### Connecting to the Server
+## 🔌 Connecting to the Server
+
+### Option 1: One-Click Installation (MCPB Bundle) ⚡
+
+**Download:** [`courtlistener-mcp-1.0.0.mcpb`](https://github.com/roycedamien/court-listener-mcp/releases/latest/download/courtlistener-mcp-1.0.0.mcpb)
+
+This server is packaged as an [MCPB (MCP Bundle)](https://github.com/modelcontextprotocol/mcpb) for one-click installation:
+
+- **Claude Desktop (macOS/Windows):** Double-click the `.mcpb` file to install
+- **109KB download** - Dependencies installed automatically via `uv`
+- **Auto-updates** when new versions are released
+- **Easy configuration** - API key can be set in Claude Desktop settings
+
+MCPB bundles are like browser extensions for MCP servers - simply download and open the file!
+
+**Requirements:**
+
+- Python 3.12+ must be installed on your system
+- `uv` package manager (bundled with Claude Desktop, or install via `curl -LsSf https://astral.sh/uv/install.sh | sh`)
+
+**Note:** After first launch, `uv` will automatically install all Python dependencies. This may take a minute.
+
+### Option 2: Claude Desktop (Manual Configuration)
+
+Claude Desktop supports MCP servers via the `streamable-http` transport. Add this configuration to your Claude Desktop config file:
+
+**macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+
+```json
+{
+  "mcpServers": {
+    "courtlistener": {
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:8000/mcp/"
+      },
+      "env": {
+        "COURT_LISTENER_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+**Important Notes:**
+
+- Start the MCP server first: `uv run python -m app.server`
+- The server must be running before starting Claude Desktop
+- Restart Claude Desktop after adding the configuration
+- The API key is optional for public endpoints but recommended for higher rate limits
+
+After restarting Claude Desktop, you'll see the CourtListener tools available in your conversation. You can ask Claude to:
+
+- "Search for recent Supreme Court opinions on privacy"
+- "Look up citation 410 U.S. 113"
+- "Find financial disclosures for judges in the 9th Circuit"
+
+### Option 3: Perplexity (via Connectors - Coming Soon)
+
+Perplexity uses a "Connectors" system for integrating external data sources. While Perplexity doesn't currently support custom MCP server connections in the same way as Claude Desktop, they have announced plans for expanded connector capabilities.
+
+**Current Status:** Perplexity connectors are primarily for built-in integrations (Google Drive, Slack, etc.)
+
+**Future Integration:** As Perplexity expands their connector ecosystem to support MCP or custom APIs, this server could be integrated. Monitor [Perplexity's documentation](https://docs.perplexity.ai) for updates on custom connector support.
+
+**Alternative:** Use the CourtListener MCP server with other MCP-compatible clients (Claude Desktop, VS Code, Cursor) and reference those results in Perplexity conversations.
+
+### Option 4: VS Code with Cline/Continue
+
+For VS Code extensions like [Cline](https://github.com/cline/cline) or [Continue](https://continue.dev/), add to your MCP settings:
+
+**Cline**: Settings → MCP Servers → Add Server
+
+```json
+{
+  "mcpServers": {
+    "courtlistener": {
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:8000/mcp/"
+      },
+      "env": {
+        "COURT_LISTENER_API_KEY": "your_api_key_here"
+      }
+    }
+  }
+}
+```
+
+**Continue**: `.continue/config.json` in your project or `~/.continue/config.json`
+
+```json
+{
+  "mcpServers": [
+    {
+      "name": "courtlistener",
+      "transport": {
+        "type": "streamable-http",
+        "url": "http://localhost:8000/mcp/"
+      },
+      "env": {
+        "COURT_LISTENER_API_KEY": "your_api_key_here"
+      }
+    }
+  ]
+}
+```
+
+### Option 5: Direct Python Client
 
 When using the streamable-http transport, clients can connect to the server using:
 
@@ -116,6 +225,16 @@ async with Client("http://localhost:8000/mcp/") as client:
     result = await client.call_tool("status")
     print(result)
 ```
+
+### Getting a CourtListener API Key
+
+1. Visit [CourtListener](https://www.courtlistener.com/)
+2. Create a free account
+3. Navigate to your profile settings
+4. Generate an API key
+5. Add it to your `.env` file or MCP client configuration
+
+**Note**: The API key is optional for read-only public endpoints, but recommended to avoid rate limiting.
 
 ## 💡 Usage Examples
 

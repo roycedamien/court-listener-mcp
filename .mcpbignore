@@ -1,0 +1,44 @@
+# Python virtual environment (dependencies will be installed by uv)
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Git
+.git/
+.gitignore
+
+# Test files
+.pytest_cache/
+.coverage
+tests/
+
+# Development files
+.vscode/
+scripts/
+
+# Docker files
+Dockerfile
+docker-compose.yml
+.dockerignore
+
+# Documentation (keep README.md and manifest.json)
+docs/
+.github/
+
+# Build artifacts
+*.egg-info/
+dist/
+build/
+
+# IDE
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+*.tmp
+*.log
