@@ -715,26 +715,33 @@ async def financial_disclosures(
             logger.error(error_msg)
         raise ValueError(error_msg)
 
-    params = {
-        "q": q,
-        "order_by": order_by,
-        "type": "fd",  # Financial disclosure type for V4 API
-    }
+    # Financial disclosures use direct endpoint, not search API
+    params: dict[str, Any] = {}
 
     # Add optional filters
+    if q:
+        params["description__icontains"] = q  # Search in description field
     if person_name:
-        params["person_name"] = person_name
+        params["person__name__icontains"] = person_name
     if year:
         params["year"] = year
+    if order_by:
+        # Map search-style ordering to financial disclosures endpoint ordering
+        if order_by == "score desc":
+            params["order_by"] = "-year"
+        elif order_by == "year desc":
+            params["order_by"] = "-year"
+        else:
+            params["order_by"] = order_by
     if limit:
-        params["hit"] = limit  # V4 uses 'hit' instead of 'limit'
+        params["page_size"] = limit
 
-    headers = {"Authorization": f"Token {API_KEY}"}
+    headers = {"Authorization": f"Token {API_KEY}"} if API_KEY else {}
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                "https://www.courtlistener.com/api/rest/v4/search/",
+                "https://www.courtlistener.com/api/rest/v4/financial-disclosures/",
                 params=params,
                 headers=headers,
                 timeout=30.0,

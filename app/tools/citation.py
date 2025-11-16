@@ -374,7 +374,7 @@ async def parse_citation_with_citeurl(
         Field(description="Use broad matching for more flexible parsing", default=True),
     ] = True,
     ctx: Context | None = None,
-) -> dict[str, str | dict | None]:
+) -> dict[str, Any]:
     """Parse a legal citation using citeurl's advanced citation recognition.
 
     This tool uses the citeurl library to parse legal citations and extract

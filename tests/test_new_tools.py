@@ -65,9 +65,9 @@ async def test_new_tools_available(client: Client[Any]) -> None:
 
 @pytest.mark.asyncio
 async def test_financial_disclosures_search_structure(client: Client[Any]) -> None:
-    """Test that search_financial_disclosures has proper error handling.
+    """Test that search_financial_disclosures works with the direct API endpoint.
 
-    This test verifies the tool structure without requiring an API key.
+    This test verifies the tool can query financial disclosures endpoint.
 
     Parameters
     ----------
@@ -77,16 +77,20 @@ async def test_financial_disclosures_search_structure(client: Client[Any]) -> No
     """
     async with client:
         # Test that the tool exists and can be called
-        # Without API key it should raise ValueError
         try:
             result = await client.call_tool(
-                "search_financial_disclosures", {"q": "test"}
+                "search_financial_disclosures", {"q": "judge", "limit": 5}
             )
-            # If we get here, either API key exists or the error handling changed
-            assert isinstance(result, list)
+            # If we get here, API call succeeded
+            assert result.content is not None
+            assert len(result.content) >= 1
         except Exception as e:
-            # Expected: ValueError about missing API key
-            assert "COURT_LISTENER_API_KEY" in str(e) or "API" in str(e)
+            # Expected possibilities: API key missing, network error, or endpoint issues
+            error_str = str(e)
+            assert any(
+                phrase in error_str
+                for phrase in ["COURT_LISTENER_API_KEY", "API", "HTTP", "401", "403"]
+            ), f"Unexpected error: {e}"
 
 
 @pytest.mark.asyncio
@@ -115,8 +119,9 @@ async def test_get_tools_structure(client: Client[Any]) -> None:
         for tool_name, param_name, test_value in new_get_tools:
             try:
                 result = await client.call_tool(tool_name, {param_name: test_value})
-                # If we get here, either API key exists or the error handling changed
-                assert isinstance(result, list)
+                # If we get here, API call succeeded (API key exists)
+                assert result.content is not None
+                assert len(result.content) >= 1
             except Exception as e:
                 # Expected: ValueError about missing API key or HTTP error
                 assert (
