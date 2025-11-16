@@ -54,12 +54,19 @@ async with Client("http://localhost:8000/mcp/") as client:
 | search_recap_documents       | q (required), court, case_name, docket_number, document_number, attachment_number, filed_after, filed_before, party_name, order_by, limit | Search RECAP filing documents                    |
 | search_audio                 | q (required), court, case_name, judge, argued_after, argued_before, order_by, limit                  | Search oral argument audio                       |
 | search_people                | q (required), name, position_type, political_affiliation, school, appointed_by, selection_method, order_by, limit | Search judges and legal professionals            |
+| search_financial_disclosures | q (required), person_name, year, order_by, limit                                                     | Search judge financial disclosures               |
 | get_opinion                  | opinion_id (required)                                                                                 | Get detailed opinion information                 |
 | get_docket                   | docket_id (required)                                                                                  | Get detailed docket information                  |
 | get_audio                    | audio_id (required)                                                                                   | Get oral argument audio information              |
 | get_court                    | court_id (required)                                                                                   | Get detailed court information                   |
 | get_person                   | person_id (required)                                                                                  | Get detailed person/judge information            |
 | get_cluster                  | cluster_id (required)                                                                                 | Get opinion cluster information                  |
+| get_financial_disclosure     | disclosure_id (required)                                                                              | Get financial disclosure details                 |
+| get_position                 | position_id (required)                                                                                | Get judge position/appointment details           |
+| get_education                | education_id (required)                                                                               | Get judge education details                      |
+| get_school                   | school_id (required)                                                                                  | Get law school details                           |
+| get_docket_entry             | entry_id (required)                                                                                   | Get docket entry details                         |
+| get_originating_court_information | oci_id (required)                                                                                | Get originating court information                |
 | lookup_citation              | citation (required)                                                                                   | Look up legal citation                           |
 | batch_lookup_citations       | citations (list, required)                                                                            | Batch lookup of multiple citations               |
 | verify_citation_format       | citation (required)                                                                                   | Verify citation format using citeurl             |

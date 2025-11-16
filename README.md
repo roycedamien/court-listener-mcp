@@ -35,8 +35,15 @@ The CourtListener MCP Server provides these production-ready tools (see [app/REA
   - `search_recap_documents` — Search RECAP filing documents
   - `search_audio` — Search oral argument audio
   - `search_people` — Search judges and legal professionals
+  - `search_financial_disclosures` — Search judge financial disclosure reports
 - **Entity Retrieval:**
   - `get_opinion`, `get_docket`, `get_audio`, `get_court`, `get_person`, `get_cluster`
+  - `get_financial_disclosure` — Get judge financial disclosure details
+  - `get_position` — Get judge position/appointment information
+  - `get_education` — Get judge education information
+  - `get_school` — Get law school information
+  - `get_docket_entry` — Get specific docket entry details
+  - `get_originating_court_information` — Get originating court details
 - **Citation & Regulation Tools:**
   - `lookup_citation`, `batch_lookup_citations`, `verify_citation_format`, `parse_citation_with_citeurl`, `extract_citations_from_text`, `enhanced_citation_lookup`
   - `list_titles`, `list_agencies`, `search_regulations`, `list_all_corrections`, `list_corrections_by_title`, `get_search_suggestions`, `get_search_summary`, `get_title_search_counts`, `get_daily_search_counts`, `get_ancestry`, `get_title_structure`, `get_source_xml`, `get_source_json`
@@ -149,6 +156,7 @@ See [app/README.md](app/README.md) and [tests/README.md](tests/README.md) for tr
 
 - [Source Code Documentation](app/README.md)
 - [Test Documentation](tests/README.md)
+- [Pro Se Medical Malpractice Research Guide](docs/PRO_SE_GUIDE.md) ⚖️ **NEW**
 - [Project Context](context.json)
 - [CourtListener API Documentation](https://www.courtlistener.com/api/rest/v4/)
 - [eCFR API Documentation](https://www.ecfr.gov/developers/documentation/api/v1)

@@ -674,51 +674,38 @@ async def people(
 
 
 @search_server.tool()
-async def case_search(
+async def financial_disclosures(
     q: Annotated[
-        str, Field(description="Search query for medical malpractice cases")
-    ] = "medical malpractice",
-    court: Annotated[
-        str, Field(description="Court ID filter (e.g., 'scotus', 'ca9', 'nysd')")
-    ] = "",
-    case_name: Annotated[str, Field(description="Filter by case name")] = "",
-    filed_after: Annotated[
-        str, Field(description="Filter cases filed after this date (YYYY-MM-DD)")
-    ] = "",
-    filed_before: Annotated[
-        str, Field(description="Filter cases filed before this date (YYYY-MM-DD)")
-    ] = "",
-    status: Annotated[
-        str, Field(description="Case status (e.g., 'Open', 'Closed', 'Pending')")
-    ] = "",
-    nature_of_suit: Annotated[
-        str, Field(description="Nature of suit code or description")
-    ] = "",
+        str, Field(description="Search query for judge financial disclosures")
+    ],
+    person_name: Annotated[str, Field(description="Filter by judge/person name")] = "",
+    year: Annotated[
+        int, Field(description="Filter by disclosure year", ge=1900, le=2100)
+    ] = 0,
     order_by: Annotated[
-        str,
-        Field(description="Sort by 'score desc', 'dateFiled desc', or 'dateFiled asc'"),
-    ] = "dateFiled desc",
+        str, Field(description="Sort by 'score desc' or 'year desc'")
+    ] = "score desc",
     limit: Annotated[
         int, Field(description="Maximum results to return", ge=1, le=100)
     ] = 20,
     ctx: Context | None = None,
 ) -> dict[str, Any]:
-    """Search for medical malpractice cases in CourtListener.
+    """Search judge financial disclosure reports in the CourtListener database.
 
-    This tool specializes in finding medical malpractice litigation, which can be
-    filtered by jurisdiction, date range, and case status.
+    This is particularly useful for researching judges who may be presiding over cases,
+    including medical malpractice cases, to understand potential conflicts of interest.
 
     Returns:
-        A dictionary containing search results with medical malpractice cases.
+        A dictionary containing search results with financial disclosure information.
 
     Raises:
         ValueError: If COURT_LISTENER_API_KEY is not found in environment variables.
 
     """
     if ctx:
-        await ctx.info(f"Searching medical malpractice cases with query: {q}")
+        await ctx.info(f"Searching financial disclosures with query: {q}")
     else:
-        logger.info(f"Searching medical malpractice cases with query: {q}")
+        logger.info(f"Searching financial disclosures with query: {q}")
 
     if not API_KEY:
         error_msg = "COURT_LISTENER_API_KEY not found in environment variables"
@@ -728,34 +715,33 @@ async def case_search(
             logger.error(error_msg)
         raise ValueError(error_msg)
 
-    params = {
-        "q": q,
-        "order_by": order_by,
-        "type": "r",  # Dockets with nested documents
-    }
+    # Financial disclosures use direct endpoint, not search API
+    params: dict[str, Any] = {}
 
     # Add optional filters
-    if court:
-        params["court"] = court
-    if case_name:
-        params["case_name"] = case_name
-    if filed_after:
-        params["date_filed_after"] = filed_after
-    if filed_before:
-        params["date_filed_before"] = filed_before
-    if status:
-        params["status"] = status
-    if nature_of_suit:
-        params["nature_of_suit"] = nature_of_suit
+    if q:
+        params["description__icontains"] = q  # Search in description field
+    if person_name:
+        params["person__name__icontains"] = person_name
+    if year:
+        params["year"] = year
+    if order_by:
+        # Map search-style ordering to financial disclosures endpoint ordering
+        if order_by == "score desc":
+            params["order_by"] = "-year"
+        elif order_by == "year desc":
+            params["order_by"] = "-year"
+        else:
+            params["order_by"] = order_by
     if limit:
-        params["hit"] = limit
+        params["page_size"] = limit
 
-    headers = {"Authorization": f"Token {API_KEY}"}
+    headers = {"Authorization": f"Token {API_KEY}"} if API_KEY else {}
 
     try:
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                "https://www.courtlistener.com/api/rest/v4/search/",
+                "https://www.courtlistener.com/api/rest/v4/financial-disclosures/",
                 params=params,
                 headers=headers,
                 timeout=30.0,
@@ -764,236 +750,9 @@ async def case_search(
             data = response.json()
 
             if ctx:
-                await ctx.info(f"Found {data.get('count', 0)} medical malpractice cases")
+                await ctx.info(f"Found {data.get('count', 0)} financial disclosures")
             else:
-                logger.info(f"Found {data.get('count', 0)} medical malpractice cases")
-
-            return data
-
-    except httpx.HTTPStatusError as e:
-        error_msg = f"HTTP error: {e}"
-        if ctx:
-            await ctx.error(error_msg)
-        else:
-            logger.error(error_msg)
-        raise e
-    except Exception as e:
-        error_msg = f"Search error: {e}"
-        if ctx:
-            await ctx.error(error_msg)
-        else:
-            logger.error(error_msg)
-        raise e
-
-
-@search_server.tool()
-async def pro_se_search(
-    q: Annotated[
-        str, Field(description="Search query for pro se litigant cases")
-    ] = "pro se",
-    court: Annotated[
-        str, Field(description="Court ID filter (e.g., 'scotus', 'ca9', 'nysd')")
-    ] = "",
-    case_name: Annotated[str, Field(description="Filter by case name")] = "",
-    filed_after: Annotated[
-        str, Field(description="Filter cases filed after this date (YYYY-MM-DD)")
-    ] = "",
-    filed_before: Annotated[
-        str, Field(description="Filter cases filed before this date (YYYY-MM-DD)")
-    ] = "",
-    status: Annotated[
-        str, Field(description="Case status (e.g., 'Open', 'Closed', 'Pending')")
-    ] = "",
-    party_name: Annotated[
-        str, Field(description="Filter by party name (plaintiff or defendant)")
-    ] = "",
-    order_by: Annotated[
-        str,
-        Field(description="Sort by 'score desc', 'dateFiled desc', or 'dateFiled asc'"),
-    ] = "dateFiled desc",
-    limit: Annotated[
-        int, Field(description="Maximum results to return", ge=1, le=100)
-    ] = 20,
-    ctx: Context | None = None,
-) -> dict[str, Any]:
-    """Search for cases with pro se (self-represented) litigants in CourtListener.
-
-    This tool finds cases where one or more parties are representing themselves
-    without legal counsel, filtered by jurisdiction, date range, and status.
-
-    Returns:
-        A dictionary containing search results with pro se cases.
-
-    Raises:
-        ValueError: If COURT_LISTENER_API_KEY is not found in environment variables.
-
-    """
-    if ctx:
-        await ctx.info(f"Searching pro se cases with query: {q}")
-    else:
-        logger.info(f"Searching pro se cases with query: {q}")
-
-    if not API_KEY:
-        error_msg = "COURT_LISTENER_API_KEY not found in environment variables"
-        if ctx:
-            await ctx.error(error_msg)
-        else:
-            logger.error(error_msg)
-        raise ValueError(error_msg)
-
-    params = {
-        "q": q,
-        "order_by": order_by,
-        "type": "r",  # Dockets with nested documents
-    }
-
-    # Add optional filters
-    if court:
-        params["court"] = court
-    if case_name:
-        params["case_name"] = case_name
-    if filed_after:
-        params["date_filed_after"] = filed_after
-    if filed_before:
-        params["date_filed_before"] = filed_before
-    if status:
-        params["status"] = status
-    if party_name:
-        params["party_name"] = party_name
-    if limit:
-        params["hit"] = limit
-
-    headers = {"Authorization": f"Token {API_KEY}"}
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                "https://www.courtlistener.com/api/rest/v4/search/",
-                params=params,
-                headers=headers,
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-
-            if ctx:
-                await ctx.info(f"Found {data.get('count', 0)} pro se cases")
-            else:
-                logger.info(f"Found {data.get('count', 0)} pro se cases")
-
-            return data
-
-    except httpx.HTTPStatusError as e:
-        error_msg = f"HTTP error: {e}"
-        if ctx:
-            await ctx.error(error_msg)
-        else:
-            logger.error(error_msg)
-        raise e
-    except Exception as e:
-        error_msg = f"Search error: {e}"
-        if ctx:
-            await ctx.error(error_msg)
-        else:
-            logger.error(error_msg)
-        raise e
-
-
-@search_server.tool()
-async def medical_malpractice_pro_se_combined(
-    court: Annotated[
-        str, Field(description="Court ID filter (e.g., 'scotus', 'ca9', 'nysd')")
-    ] = "",
-    case_name: Annotated[str, Field(description="Filter by case name")] = "",
-    filed_after: Annotated[
-        str, Field(description="Filter cases filed after this date (YYYY-MM-DD)")
-    ] = "",
-    filed_before: Annotated[
-        str, Field(description="Filter cases filed before this date (YYYY-MM-DD)")
-    ] = "",
-    status: Annotated[
-        str, Field(description="Case status (e.g., 'Open', 'Closed', 'Pending')")
-    ] = "",
-    party_name: Annotated[
-        str, Field(description="Filter by party name (plaintiff or defendant)")
-    ] = "",
-    order_by: Annotated[
-        str,
-        Field(description="Sort by 'score desc', 'dateFiled desc', or 'dateFiled asc'"),
-    ] = "dateFiled desc",
-    limit: Annotated[
-        int, Field(description="Maximum results to return", ge=1, le=100)
-    ] = 20,
-    ctx: Context | None = None,
-) -> dict[str, Any]:
-    """Search for medical malpractice cases with pro se (self-represented) litigants.
-
-    This specialized tool combines both search criteria to find cases where
-    medical malpractice claims are being litigated by self-represented parties.
-    Results can be filtered by jurisdiction, date range, and case status.
-
-    Returns:
-        A dictionary containing search results with pro se medical malpractice cases.
-
-    Raises:
-        ValueError: If COURT_LISTENER_API_KEY is not found in environment variables.
-
-    """
-    if ctx:
-        await ctx.info("Searching pro se medical malpractice cases")
-    else:
-        logger.info("Searching pro se medical malpractice cases")
-
-    if not API_KEY:
-        error_msg = "COURT_LISTENER_API_KEY not found in environment variables"
-        if ctx:
-            await ctx.error(error_msg)
-        else:
-            logger.error(error_msg)
-        raise ValueError(error_msg)
-
-    # Combine search terms for both medical malpractice and pro se
-    combined_query = "medical malpractice AND pro se"
-
-    params = {
-        "q": combined_query,
-        "order_by": order_by,
-        "type": "r",  # Dockets with nested documents
-    }
-
-    # Add optional filters
-    if court:
-        params["court"] = court
-    if case_name:
-        params["case_name"] = case_name
-    if filed_after:
-        params["date_filed_after"] = filed_after
-    if filed_before:
-        params["date_filed_before"] = filed_before
-    if status:
-        params["status"] = status
-    if party_name:
-        params["party_name"] = party_name
-    if limit:
-        params["hit"] = limit
-
-    headers = {"Authorization": f"Token {API_KEY}"}
-
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                "https://www.courtlistener.com/api/rest/v4/search/",
-                params=params,
-                headers=headers,
-                timeout=30.0,
-            )
-            response.raise_for_status()
-            data = response.json()
-
-            if ctx:
-                await ctx.info(f"Found {data.get('count', 0)} pro se medical malpractice cases")
-            else:
-                logger.info(f"Found {data.get('count', 0)} pro se medical malpractice cases")
+                logger.info(f"Found {data.get('count', 0)} financial disclosures")
 
             return data
 
